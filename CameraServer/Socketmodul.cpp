@@ -1,11 +1,11 @@
-#include Socketmodul.h
+#include "Socketmodul.h"
 
 
 // constructor
 Socketmodul::Socketmodul(){
 	connectionStatus = false;
-	modulePort = Socketmodul::SOCKETMODUL_PORT;
-	tickRate = Socketmodul::MAX_TICK_RATE;
+	modulePort = SOCKETMODUL_PORT;
+	tickRate = MAX_TICK_RATE;
 	stopConnection = false;
 };
 
@@ -53,6 +53,6 @@ void Socketmodul::printSocketStatus(){
 	fprintf(stderr, "Socketstatus");
 };
 
-void Socketmodul::SocketServerTask(void* arg){
+void* Socketmodul::SocketServerTask(void* arg){
 
 };

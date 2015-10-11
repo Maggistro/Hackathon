@@ -11,20 +11,20 @@
 #define SOCKETMODUL_PORT 8080
 
 // send rate or timeout
-#define unsigned int MAX_TICK_RATE = 100;
+#define MAX_TICK_RATE  100;
 
 
-#define unsigned int MAX_DATA_LENGTH = 448
-#define unsigned int DATALENGTH_START = 192;
-#define unsigned int DATALENGTH_STOP = 0;
-#define unsigned int DATALENGTH_RESET = 0;
-#define unsigned int DATALENGTH_THUMB_UP = 0;
-#define unsigned int DATALENGTH_THUMB_DOWN = 0;
-#define unsigned int DATALENGTH_FOLLOW = 192;
-#define unsigned int DATALENGTH_INFO = 448;
-#define unsigned int DATALENGTH_STATUS = 64;
+#define MAX_DATA_LENGTH  448
+#define DATALENGTH_START  192;
+#define DATALENGTH_STOP  0;
+#define DATALENGTH_RESET  0;
+#define DATALENGTH_THUMB_UP  0;
+#define DATALENGTH_THUMB_DOWN  0;
+#define DATALENGTH_FOLLOW  192;
+#define DATALENGTH_INFO  448;
+#define SATALENGTH_STATUS 64;
 
-#define unsigned int MAX_FAILED_CONNECTION_TRYS = 64;
+#define MAX_FAILED_CONNECTION_TRYS  64;
 
 /**
 * possible instructions
