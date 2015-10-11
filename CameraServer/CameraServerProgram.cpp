@@ -1,6 +1,7 @@
 #include "CameraServerProgram.h"
 
 void main(){
+	//test
 	//create data exchange 
 	//thread safe queue containing packages
 
