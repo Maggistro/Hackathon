@@ -54,5 +54,5 @@ void Socketmodul::printSocketStatus(){
 };
 
 void* Socketmodul::SocketServerTask(void* arg){
-
+	return NULL;
 };

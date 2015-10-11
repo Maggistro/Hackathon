@@ -21,7 +21,7 @@
     <ClInclude Include="DataTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\OwnSocket\Socketmodul.h">
+    <ClInclude Include="Socketmodul.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClCompile Include="CameraServerProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\OwnSocket\Socketmodul.cpp">
+    <ClCompile Include="Socketmodul.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\OwnSocket\Socketmodul.h" />
+    <ClInclude Include="Socketmodul.h" />
     <ClInclude Include="CameraWorker.h" />
     <ClInclude Include="DataTypes.h" />
     <ClInclude Include="SocketServer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\OwnSocket\Socketmodul.cpp" />
+    <ClCompile Include="Socketmodul.cpp" />
     <ClCompile Include="CameraServerProgram.cpp" />
     <ClCompile Include="CameraWorker.cpp" />
     <ClCompile Include="SocketServer.cpp" />
