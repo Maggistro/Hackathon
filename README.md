@@ -1,3 +1,10 @@
 # Hackathon
 
-Conatains folders for Java and C# project for Hackathon
+Conatains folders for Java ( MonitorClient ) and C++ ( CameraServer ) projects for Hackathon.
+
+Requirements:
+  C++:  - Intel RealSense SDK
+        - Visual Studio 2013
+        - Windows 8+
+  Java: - Sunrise ( getestet mit 1.8 )
+        - jdk 1.6
