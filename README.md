@@ -1,6 +1,6 @@
 # Hackathon
 
-Conatains folders for Java ( MonitorClient ) and C++ ( CameraServer ) projects for Hackathon.
+Conatains folders for Java ( MotionClient ) and C++ ( CameraServer ) projects for Hackathon.
 
 Requirements:
   C++:  - Intel RealSense SDK
