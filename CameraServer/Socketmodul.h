@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "DataTypes.h";
+#include <thread>
+#include <iostream>
 
 // its a linux specific library
 //#include <pthread.h>
@@ -97,14 +99,15 @@ public:
 	Socketmodul();
 	~Socketmodul();
 
-	//use sockets
-	bool startServer();
-	bool stopServer();
+	//starts the necessary threads
+	bool startServer(SOCKET *socket);
 
+	
 	bool openConnection();
 	bool closeConnection();	
 	bool handlePackage(PACKAGE package);
 
+	//some not needed functions :)
 	void changeConnectionTickRate(int newTickRate);
 	void printSocketStatus();
 

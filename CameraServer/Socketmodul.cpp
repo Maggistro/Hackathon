@@ -15,14 +15,20 @@ Socketmodul::~Socketmodul(){
 };
 
 //startServer
-bool Socketmodul::startServer(){
-	//TODO: implement. Hier wurde immer pthread verwendet --> UNIX
+bool Socketmodul::startServer(SOCKET *socket){
+
+	std::thread readThread(SocketServerTaskForRead(socket));
+	std::thread writeThread(SocketServerTaskForSend(socket));
+
+	std::cout << "both tasks are now started...\n";
+
+	//synchronize threads and wait for ending
+	readThread.join();
+	writeThread.join();
+
+	return true;
 };
 
-
-bool Socketmodul::stopServer(){
-	//TODO: implement. Hier wurde immer pthread verwendet --> UNIX
-};
 
 // seen in "creating a socket for the server" in WINSOCKET docu.
 bool Socketmodul::openConnection(){
@@ -97,7 +103,6 @@ bool Socketmodul::openConnection(){
 
 
 bool Socketmodul::closeConnection(){
-	stopConnection = true;
 
 	int iResult;
 
@@ -160,8 +165,6 @@ void* Socketmodul::SocketServerTaskForRead(void* arg){
 			}
 		}
 	}
-	
-	return NULL;
 };
 
 void* Socketmodul::SocketServerTaskForSend(void* arg){
@@ -185,10 +188,9 @@ void* Socketmodul::SocketServerTaskForSend(void* arg){
 					printf("send failed: %d\n", WSAGetLastError());
 					closesocket(javaSocket);
 					WSACleanup();
-					return NULL;
+					return;
 				}
 			}
 		}
 	}
-	return NULL;
 };
