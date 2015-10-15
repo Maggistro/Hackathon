@@ -7,8 +7,18 @@
 #include <stdlib.h>
 #include "DataTypes.h";
 
+// its a linux specific library
+//#include <pthread.h>
+
+#include <WinSock2.h>
+#include <winsock.h>
+#include <ws2tcpip.h>
+
+
+
 // constant declarations
-#define SOCKETMODUL_PORT 8080
+#define SOCKETMODUL_PORT "27015"
+#define BUFFER_LENGTH 512
 
 // send rate or timeout
 #define MAX_TICK_RATE  100;
@@ -44,7 +54,6 @@ typedef struct{
 
 typedef struct{
 	SOCKET_PACKAGE_HEADER dataHeader;
-	// TODO: DEFINE DATA 
 }SOCKET_PACKAGE;
 
 // instructions that have a body
@@ -77,25 +86,31 @@ typedef struct{
 class Socketmodul{
 
 private:
-	bool connectionStatus;
-	unsigned int modulePort;
+	bool isClientConnected;
 	unsigned int tickRate;
 	bool stopConnection;
+	bool connectionStatus;
+	SOCKET javaSocket;
 	
 
 public:
 	Socketmodul();
 	~Socketmodul();
 
+	//use sockets
+	bool startServer();
+	bool stopServer();
+
 	bool openConnection();
 	bool closeConnection();	
-	bool sendData(PACKAGE package);
-	bool receiveData(PACKAGE package);
+	bool handlePackage(PACKAGE package);
+
 	void changeConnectionTickRate(int newTickRate);
 	void printSocketStatus();
 
 	//starts the server task
-	void* SocketServerTask(void* arg);
+	void* SocketServerTaskForRead(void* arg);
+	void* SocketServerTaskForSend(void* arg);
 
 
 };
