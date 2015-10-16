@@ -28,6 +28,7 @@
   <ItemGroup>
     <ClCompile Include="CameraServerProgram.cpp" />
     <ClCompile Include="CameraWorker.cpp" />
+    <ClCompile Include="CameraWorkerVesrion1.cpp" />
     <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Socketmodul.cpp" />
   </ItemGroup>
