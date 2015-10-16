@@ -27,7 +27,7 @@
   <ItemGroup>
     <ClCompile Include="CameraServerProgram.cpp" />
     <ClCompile Include="CameraWorker.cpp" />
-    <ClCompile Include="SocketServer.cpp" />
+    <ClCompile Include="Socketmodul.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>CameraServer</ProjectName>

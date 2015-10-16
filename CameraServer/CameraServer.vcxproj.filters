@@ -29,10 +29,10 @@
     <ClCompile Include="CameraWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SocketServer.cpp">
+    <ClCompile Include="CameraServerProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CameraServerProgram.cpp">
+    <ClCompile Include="Socketmodul.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
