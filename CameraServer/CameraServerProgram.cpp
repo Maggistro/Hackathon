@@ -1,6 +1,6 @@
 #include "CameraServerProgram.h"
 #include "CameraWorker.h"
-
+#include "Socketmodul.h"
 
 
 void main(){
@@ -10,6 +10,9 @@ void main(){
 
 	//init camera worker 
 	CameraWorker cameraWorker;
+	Socketmodul module;
+	module.startServer();
+
 	//new producer thread interpreting camera data and creating packages for the queue 
 
 	//init socket server

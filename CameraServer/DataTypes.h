@@ -1,11 +1,14 @@
+#ifndef DATATYPES_H
+#define DATATYPES_H 
+
 /**
-Defines a set of widely used data types for socket and interprocess communication.
+defines a set of widely used data types for socket and interprocess communication.
 */
 
 typedef struct {
 	char* header;
 	_int64* data;
-} PACKAGE;
+}instruction_package;
 
 typedef enum {
 	start = 3,
@@ -16,4 +19,6 @@ typedef enum {
 	follow = 3,
 	info = 7,
 	status = 1,
-} HEADERS;
+}headers;
+
+#endif
