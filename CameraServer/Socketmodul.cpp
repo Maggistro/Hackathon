@@ -1,4 +1,4 @@
-#include "Socketmodul.h"
+#include <Socketmodul.h>
 
 
 // constructor
@@ -15,16 +15,12 @@ Socketmodul::~Socketmodul(){
 };
 
 //startServer
-bool Socketmodul::startServer(SOCKET *socket){
+bool Socketmodul::startServer(){
 
-	std::thread readThread(SocketServerTaskForRead(socket));
-	std::thread writeThread(SocketServerTaskForSend(socket));
 
-	std::cout << "both tasks are now started...\n";
-
-	//synchronize threads and wait for ending
-	readThread.join();
-	writeThread.join();
+	//Hier brauchen wir noch einen Thread
+	SocketServerTaskForSend(this);
+	closeConnection();
 
 	return true;
 };
@@ -33,7 +29,7 @@ bool Socketmodul::startServer(SOCKET *socket){
 // seen in "creating a socket for the server" in WINSOCKET docu.
 bool Socketmodul::openConnection(){
 
-	//initialize Winsocket
+	////initialize Winsocket
 	WSADATA wsaData;
 
 	int iResult;
@@ -98,6 +94,7 @@ bool Socketmodul::openConnection(){
 	}
 
 	connectionStatus = true;
+	isClientConnected = true;
 	return true;
 };
 
@@ -114,10 +111,10 @@ bool Socketmodul::closeConnection(){
 		return false;
 	}
 
-
 	closesocket(javaSocket);
 	WSACleanup();
 	connectionStatus = false;
+	isClientConnected = false;
 	return true;
 };
 
@@ -127,7 +124,7 @@ void Socketmodul::printSocketStatus(){
 };
 
 
-bool Socketmodul::handlePackage(PACKAGE package){
+bool Socketmodul::handlePackage(instruction_package p){
 
 	//TODO: handle packages
 
@@ -135,14 +132,14 @@ bool Socketmodul::handlePackage(PACKAGE package){
 }
 
 
-void* Socketmodul::SocketServerTaskForRead(void* arg){
+void Socketmodul::SocketServerTaskForRead(Socketmodul* socket){
 
 	char buffer[BUFFER_LENGTH];
 	int bytesRead = 0;
 	bool recvOK, sendOK = true;
 	int iResult, iSendResult;
 
-	Socketmodul *pSocketModul = (Socketmodul*)arg;
+	Socketmodul *pSocketModul = (Socketmodul*)socket;
 
 	pSocketModul->stopConnection = false;
 
@@ -167,15 +164,17 @@ void* Socketmodul::SocketServerTaskForRead(void* arg){
 	}
 };
 
-void* Socketmodul::SocketServerTaskForSend(void* arg){
+
+void Socketmodul::SocketServerTaskForSend(Socketmodul* socketModul){
 
 
-	char buffer[BUFFER_LENGTH];
+	char bufferSend[BUFFER_LENGTH];
+	char bufferRead[BUFFER_LENGTH];
 	int bytesRead = 0;
 	bool recvOK, sendOK = true;
-	int iSendResult;
+	int iSendResult, iResult;
 
-	Socketmodul *pSocketModul = (Socketmodul*)arg;
+	Socketmodul *pSocketModul = socketModul;
 
 	pSocketModul->stopConnection = false;
 
@@ -183,13 +182,23 @@ void* Socketmodul::SocketServerTaskForSend(void* arg){
 	while (!pSocketModul->stopConnection){
 		if (pSocketModul->openConnection()){
 			while (pSocketModul->isClientConnected && (!pSocketModul->stopConnection)){
-				iSendResult = send(javaSocket, buffer, BUFFER_LENGTH, 0);
+				iSendResult = send(javaSocket, bufferSend, BUFFER_LENGTH, 0);
 				if (iSendResult == SOCKET_ERROR){
 					printf("send failed: %d\n", WSAGetLastError());
 					closesocket(javaSocket);
 					WSACleanup();
-					return;
 				}
+
+				iResult = recv(javaSocket, bufferRead, BUFFER_LENGTH, 0);
+				if (iResult > 0){
+					printf("Bytes received: %d\n", iResult);
+					std::cout << bufferRead;
+					//TODO: Check if you get something
+				}
+				
+				std::cout << bufferRead;
+				pSocketModul->stopConnection = true;
+
 			}
 		}
 	}

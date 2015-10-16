@@ -5,18 +5,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "DataTypes.h";
 #include <thread>
 #include <iostream>
 
 // its a linux specific library
 //#include <pthread.h>
-
-#include <WinSock2.h>
-#include <winsock.h>
+#include "Winsock2.h"
+#include "windows.h"
+//#include <WinSock2.h>
+//#include <winsock.h>
 #include <ws2tcpip.h>
 
-
+#include "DataTypes.h";
 
 // constant declarations
 #define SOCKETMODUL_PORT "27015"
@@ -49,41 +49,6 @@
 * "info": axis positions
 * "status": feedback from the controller/robot
 */
-typedef struct{
-	char instructionName[64];
-	unsigned int dataLength;
-}SOCKET_PACKAGE_HEADER;
-
-typedef struct{
-	SOCKET_PACKAGE_HEADER dataHeader;
-}SOCKET_PACKAGE;
-
-// instructions that have a body
-typedef struct{
-	unsigned int x;
-	unsigned int y;
-	unsigned int z;
-}INSTRUCTION_START_BODY;
-
-typedef struct{
-	unsigned int x;
-	unsigned int y;
-	unsigned int z;
-}INSTRUCTION_FOLLOW_BODY;
-
-typedef struct{
-	int axis_one;
-	int axis_two;
-	int axis_three;
-	int axis_four;
-	int axis_five;
-	int axis_six;
-	int axis_seven;
-}INSTRUCTION_INFO_BODY;
-
-typedef struct{
-	unsigned int status;
-}INSTRUCTION_STATUS_BODY;
 
 class Socketmodul{
 
@@ -100,20 +65,20 @@ public:
 	~Socketmodul();
 
 	//starts the necessary threads
-	bool startServer(SOCKET *socket);
+	bool startServer();
 
 	
 	bool openConnection();
 	bool closeConnection();	
-	bool handlePackage(PACKAGE package);
+	bool handlePackage(instruction_package p);
 
 	//some not needed functions :)
 	void changeConnectionTickRate(int newTickRate);
 	void printSocketStatus();
 
 	//starts the server task
-	void* SocketServerTaskForRead(void* arg);
-	void* SocketServerTaskForSend(void* arg);
+	void SocketServerTaskForRead(Socketmodul* socketModul);
+	void SocketServerTaskForSend(Socketmodul* socketModul);
 
 
 };

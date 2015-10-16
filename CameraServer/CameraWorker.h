@@ -1,6 +1,6 @@
 #pragma once
 #pragma once
-#include "DataTypes.h";
+//#include "DataTypes.h";
 
 class CameraWorker
 {
