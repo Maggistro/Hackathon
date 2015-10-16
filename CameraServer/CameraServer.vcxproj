@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Pipe.h" />
     <ClInclude Include="Socketmodul.h" />
     <ClInclude Include="CameraWorker.h" />
     <ClInclude Include="DataTypes.h" />
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ClCompile Include="CameraServerProgram.cpp" />
     <ClCompile Include="CameraWorker.cpp" />
+    <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="Socketmodul.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
