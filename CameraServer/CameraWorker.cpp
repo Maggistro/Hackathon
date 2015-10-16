@@ -1,10 +1,12 @@
 #include "CameraWorker.h"
+#include "DataTypes.h"
 #include <pxcsession.h>
 #include <pxcsensemanager.h>
 #include <pxchanddata.h>
 #include <pxchandmodule.h>
 #include <pxchandconfiguration.h>
 #include <iostream>
+using namespace std;
 
 class GestureHandler : public PXCSenseManager::Handler
 
@@ -35,18 +37,61 @@ wchar_t const* thumb_up = L"thumb_up";
 wchar_t const* thumb_down = L"thumb_down";
 wchar_t const* initial = spreadfingers;
 
+PXCHandData::IHand *ihand;
+pxcUID handId;
+pxcF32 handCenterX;
+pxcF32 handCenterY;
+pxcF32 handCenterZ;
+PXCHandData::JointData nodes[0x20][0x20];
+
 void workWithGesture(wchar_t const* gestureName, PXCHandData *handData){
 
+
+
 	if (wcscmp(fist, gestureName) == 0)
-	{
-		PXCHandData::IHand *ihand;
+	{		
+		pxcI32 nhand = handData->QueryNumberOfHands();
+	
+		//PXCHandData::JointData** nodes;
+		//nodes = new PXCHandData::JointData[][] {new PXCHandData::JointData[0x20], new PXCHandData::JointData[0x20]};
+		if (nhand > 0)
+		{
+			// Retrive hand indentifier
+			handData->QueryHandData(PXCHandData::AccessOrderType::ACCESS_ORDER_BY_TIME, 0, ihand) == PXC_STATUS_NO_ERROR;
+			// retrive hand data
+			handData->QueryHandDataById(handId,ihand);
+
+			for (pxcI32 i = 0; i < nhand; i++)
+			{
+				for (pxcI32 j = 0; j < 0x20; j++)
+				{
+					PXCHandData::JointData jointData;
+					ihand->QueryTrackedJoint((PXCHandData::JointType)j, jointData);
+					nodes[i][j] = jointData;
+				}
+
+			}
+
+			// get world coordinates
+			handCenterX =  nodes[0][PXCHandData::JointType::JOINT_CENTER].positionWorld.x;
+			handCenterY = nodes[0][PXCHandData::JointType::JOINT_CENTER].positionWorld.y;
+			handCenterZ = nodes[0][PXCHandData::JointType::JOINT_CENTER].positionWorld.z;
+
+			cout <<"X: "<< handCenterX << " Y: " << handCenterX << " Z: " << handCenterZ <<endl;
+			
+		}
+		return;
+
+		}
+
+/*
 		if (handData->QueryHandData(PXCHandData::AccessOrderType::ACCESS_ORDER_BY_TIME, handData->QueryNumberOfHands(), ihand) == PXC_STATUS_NO_ERROR)
 		{
 
 			pxcI32 c = ihand->QueryTrackingStatus();
 			printf("value of c = 0x%08x", c);
 		}
-
+*/
 
 		//if (config->SetTrackingMode(PXCHandData::TRACKING_MODE_EXTREMITIES) == true){
 		//	for (int j = 0; j < PXCHandData::NUMBER_OF_EXTREMITIES; j++)
@@ -58,8 +103,8 @@ void workWithGesture(wchar_t const* gestureName, PXCHandData *handData){
 		//DisplayJoints(handData);
 		//}
 
-		return;
-	}
+		//return;
+	
 	else if (wcscmp(spreadfingers, gestureName) == 0)
 	{
 		wprintf_s(L"%s\n", gestureName);
