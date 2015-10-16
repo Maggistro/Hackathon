@@ -9,7 +9,8 @@ import robotData.RobotData;
 import com.kuka.roboticsAPI.applicationModel.RoboticsAPIApplication;
 import com.kuka.roboticsAPI.controllerModel.Controller;
 import com.kuka.roboticsAPI.deviceModel.LBR;
-import commands.incomming.CommandFactory;
+
+import commands.CommandFactory;
 import commands.incomming.IInCommingCommand;
 import commands.outgoing.IOutGoingCommand;
 
@@ -35,8 +36,8 @@ import connection.ConnectionServer;
  * @see #dispose()
  */
 public class ClientApplication extends RoboticsAPIApplication {
-	private final static String ipAddress = "127.0.0.0";
-	private final static int clientPort = 27015;
+	private final static String ipAddress = "";
+	private final static int clientPort = 0000;
 	private final static int serverPort = 0000;
 
 	private Controller kuka_Sunrise_Cabinet_1;
@@ -59,19 +60,19 @@ public class ClientApplication extends RoboticsAPIApplication {
 	public void run() {
 		System.out.println(lbr_iiwa_14_R820_1.getCurrentJointPosition());
 		
+		ExecutorService executorService = Executors.newFixedThreadPool(3);
+
+		CommandFactory commandFactory = new CommandFactory(
+				_recivedDataQueue, _outGoingCommandQueue,
+				_activCommandQueue, lbr_iiwa_14_R820_1, robotData);
+		ConnectionClient client = new ConnectionClient(_recivedDataQueue,
+				clientPort, ipAddress);
+		ConnectionServer server = new ConnectionServer(
+				_outGoingCommandQueue, serverPort);
+		
 		do {
-			ExecutorService executorService = Executors.newFixedThreadPool(3);
-
-			CommandFactory commandFactory = new CommandFactory(
-					_recivedDataQueue, _outGoingCommandQueue,
-					_activCommandQueue, lbr_iiwa_14_R820_1, robotData);
-			ConnectionClient client = new ConnectionClient(_recivedDataQueue,
-					clientPort, ipAddress);
-			ConnectionServer server = new ConnectionServer(
-					_outGoingCommandQueue, serverPort);
-
 			executorService.execute(client);
-			executorService.execute(server);
+			//executorService.execute(server);
 			executorService.execute(commandFactory);
 		} while (true);
 	}

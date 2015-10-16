@@ -49,7 +49,7 @@ public class StatusCommand extends AbstractOutGoingCommand{
 			status = -1;
 		}
 		
-		data[1] = ByteConverter.convertIntTo64Byte(status);
+		data[0] = ByteConverter.convertIntTo64Byte(status);
 		
 		return data;
 	}
