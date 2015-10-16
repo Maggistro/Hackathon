@@ -7,7 +7,7 @@ import com.kuka.roboticsAPI.deviceModel.LBR;
 
 import connection.ByteConverter;
 
-public class StatusCommand  implements IOutGoingCommand {
+public class StatusCommand extends AbstractOutGoingCommand{
 
 	private LBR _robot = null;
 	

@@ -1,34 +1,33 @@
 package application;
 
-
-import java.io.IOException;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import robotData.RobotData;
 
 import com.kuka.roboticsAPI.applicationModel.RoboticsAPIApplication;
 import com.kuka.roboticsAPI.controllerModel.Controller;
 import com.kuka.roboticsAPI.deviceModel.LBR;
-
-import commands.ICommand;
 import commands.incomming.CommandFactory;
 import commands.incomming.IInCommingCommand;
 import commands.outgoing.IOutGoingCommand;
 
-import connection.Connection;
+import connection.ConnectionClient;
+import connection.ConnectionServer;
 
 /**
  * Implementation of a robot application.
  * <p>
- * The application provides a {@link RoboticsAPITask#initialize()} and a 
- * {@link RoboticsAPITask#run()} method, which will be called successively in 
- * the application lifecycle. The application will terminate automatically after 
- * the {@link RoboticsAPITask#run()} method has finished or after stopping the 
- * task. The {@link RoboticsAPITask#dispose()} method will be called, even if an 
- * exception is thrown during initialization or run. 
+ * The application provides a {@link RoboticsAPITask#initialize()} and a
+ * {@link RoboticsAPITask#run()} method, which will be called successively in
+ * the application lifecycle. The application will terminate automatically after
+ * the {@link RoboticsAPITask#run()} method has finished or after stopping the
+ * task. The {@link RoboticsAPITask#dispose()} method will be called, even if an
+ * exception is thrown during initialization or run.
  * <p>
- * <b>It is imperative to call <code>super.dispose()</code> when overriding the 
- * {@link RoboticsAPITask#dispose()} method.</b> 
+ * <b>It is imperative to call <code>super.dispose()</code> when overriding the
+ * {@link RoboticsAPITask#dispose()} method.</b>
  * 
  * @see UseRoboticsAPIContext
  * @see #initialize()
@@ -36,16 +35,18 @@ import connection.Connection;
  * @see #dispose()
  */
 public class ClientApplication extends RoboticsAPIApplication {
-	private final static String ipAddress = "";
-	private final static  int port = 0000;
-	
+	private final static String ipAddress = "127.0.0.0";
+	private final static int clientPort = 27015;
+	private final static int serverPort = 0000;
+
 	private Controller kuka_Sunrise_Cabinet_1;
 	private LBR lbr_iiwa_14_R820_1;
-	private Connection connection = new Connection(ipAddress, port);
-	
+
+	private LinkedBlockingDeque<byte[]> _recivedDataQueue = new LinkedBlockingDeque<byte[]>();
+	private LinkedBlockingDeque<IOutGoingCommand> _outGoingCommandQueue = new LinkedBlockingDeque<IOutGoingCommand>();
+	private LinkedBlockingDeque<IInCommingCommand> _activCommandQueue = new LinkedBlockingDeque<IInCommingCommand>();
+
 	private RobotData robotData = new RobotData();
-	private ConcurrentLinkedQueue<IInCommingCommand> aktivCommands = new ConcurrentLinkedQueue<IInCommingCommand>();
-	
 
 	@Override
 	public void initialize() {
@@ -56,40 +57,32 @@ public class ClientApplication extends RoboticsAPIApplication {
 
 	@Override
 	public void run() {
-		ICommand command= null;
+		System.out.println(lbr_iiwa_14_R820_1.getCurrentJointPosition());
 		
 		do {
-			try {
-				command = CommandFactory.generateCommand(connection, lbr_iiwa_14_R820_1, robotData, aktivCommands);
-				
-				if (command == null) {
-					System.out.println("No Command recived.");
-				}else if(command instanceof IInCommingCommand){
-					//Execute incomming command
-					IInCommingCommand incommingCommand = (IInCommingCommand) command;
-					incommingCommand.execute();
-				}else if(command instanceof IOutGoingCommand){
-					//Sending outgoing command
-					IOutGoingCommand outcommand = (IOutGoingCommand) command;
-					connection.sendBytes(outcommand.getHeader(), outcommand.getData());
-				}				
-			} catch (IOException e) {
-				System.out.println("Some error occures during reading form the stream.");
-				e.printStackTrace();
-			}
+			ExecutorService executorService = Executors.newFixedThreadPool(3);
+
+			CommandFactory commandFactory = new CommandFactory(
+					_recivedDataQueue, _outGoingCommandQueue,
+					_activCommandQueue, lbr_iiwa_14_R820_1, robotData);
+			ConnectionClient client = new ConnectionClient(_recivedDataQueue,
+					clientPort, ipAddress);
+			ConnectionServer server = new ConnectionServer(
+					_outGoingCommandQueue, serverPort);
+
+			executorService.execute(client);
+			executorService.execute(server);
+			executorService.execute(commandFactory);
 		} while (true);
 	}
 
-	
-	
 	@Override
 	public void dispose() {
-		connection.closeSockedStreams();
-		
-		for (IInCommingCommand incommingcommand : aktivCommands) {
+
+		for (IInCommingCommand incommingcommand : _activCommandQueue) {
 			incommingcommand.abourt();
 		}
-		
+
 		super.dispose();
 	}
 

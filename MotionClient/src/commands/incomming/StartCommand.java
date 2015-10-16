@@ -1,6 +1,8 @@
 package commands.incomming;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import static com.kuka.roboticsAPI.motionModel.BasicMotions.linRel;
+
+import java.util.concurrent.LinkedBlockingDeque;
 
 import robotData.RobotData;
 
@@ -8,27 +10,31 @@ import com.kuka.roboticsAPI.deviceModel.LBR;
 import com.kuka.roboticsAPI.geometricModel.Frame;
 import com.kuka.roboticsAPI.motionModel.CartesianPTP;
 import com.kuka.roboticsAPI.motionModel.IMotionContainer;
+import com.kuka.roboticsAPI.motionModel.RelativeLIN;
 
-public class StartCommand implements IInCommingCommand{
-	
+public class StartCommand extends AbstractInComingCommand {
+
 	private static final int DEFAULT_MOTION_DELTA_IN_MM = 500;
-	
+
 	private LBR _robot = null;
 	private Frame _frame = null;
-	private ConcurrentLinkedQueue<IInCommingCommand> _activCommands = null;
+	private LinkedBlockingDeque<IInCommingCommand> _activCommands = null;
 	private RobotData _robotData = null;
-	
+
 	private IMotionContainer _motion = null;
 	private boolean _isRunning = false;
-	
-	
+
 	/**
-	 * Default constructor. 
+	 * Default constructor.
 	 * 
-	 * @param robot the robot which should be moved.
-	 * @param frame the frame which determines the direction of the motion.
+	 * @param robot
+	 *            the robot which should be moved.
+	 * @param frame
+	 *            the frame which determines the direction of the motion.
 	 */
-	public StartCommand(LBR robot, Frame frame,ConcurrentLinkedQueue<IInCommingCommand> activCommands, RobotData robotData) {
+	public StartCommand(LBR robot, Frame frame,
+			LinkedBlockingDeque<IInCommingCommand> activCommands,
+			RobotData robotData) {
 		super();
 		_robot = robot;
 		_frame = frame;
@@ -39,11 +45,12 @@ public class StartCommand implements IInCommingCommand{
 	@Override
 	public void execute() {
 		if (_robot != null && _frame != null) {
-			
+
 			_isRunning = true;
-			
+
 			do {
-				_motion = _robot.move(new CartesianPTP(getNextTarget()).setJointVelocityRel(_robotData.getVelocity()));
+				RelativeLIN motion = linRel(_frame.getX(), _frame.getY(), _frame.getZ());
+				_robot.move(motion);
 			} while (_isRunning);
 		}
 		_activCommands.remove(this);
@@ -56,20 +63,5 @@ public class StartCommand implements IInCommingCommand{
 			_motion.cancel();
 		}
 		_activCommands.remove(this);
-	}
-	
-	/**
-	 * Creates the new Frame for the motion. The default range to move is defined in the DEFAULT_MOTION_DELTA constants which is: {@value DEFAULT_MOTION_DELTA}.
-	 * @return
-	 * 	the ne frame with the offset.
-	 */
-	private Frame getNextTarget() {
-		Frame currentFlangePosition = _robot.getCurrentCartesianPosition(_robot.getFlange());
-		
-		double x = _frame.getX() != 0.0? currentFlangePosition.getX() + DEFAULT_MOTION_DELTA_IN_MM : currentFlangePosition.getX();
-		double z = _frame.getY() != 0.0? currentFlangePosition.getY() + DEFAULT_MOTION_DELTA_IN_MM : currentFlangePosition.getY();
-		double y = _frame.getZ() != 0.0? currentFlangePosition.getZ() + DEFAULT_MOTION_DELTA_IN_MM : currentFlangePosition.getZ();		
-		
-		return new Frame(x,y,z);
 	}
 }

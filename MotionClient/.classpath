@@ -33,5 +33,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/MotionClient/KUKAJavaLib/com.kuka.task.api_1.0.0.buildDev_1297-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

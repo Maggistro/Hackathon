@@ -1,28 +1,44 @@
 package commands.incomming;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import com.kuka.roboticsAPI.deviceModel.LBR;
 import com.kuka.roboticsAPI.geometricModel.Frame;
 
+import commands.Command;
 import commands.ICommand;
+import commands.outgoing.IOutGoingCommand;
 import commands.outgoing.InfoCommand;
 import commands.outgoing.StatusCommand;
 
-import connection.Connection;
-
 import robotData.RobotData;
 
-public class CommandFactory {
+public class CommandFactory implements Runnable {
 
-	public static ICommand generateCommand(Connection connection, LBR robot,
-			RobotData robotData,
-			ConcurrentLinkedQueue<IInCommingCommand> activCommands)
-			throws IOException {
+	private LinkedBlockingDeque<byte[]> _recivedDataQueue;
+	private LinkedBlockingDeque<IOutGoingCommand> _outGoingCommandQueue;
+	private LinkedBlockingDeque<IInCommingCommand> _activCommandQueue;
 
-		byte[] header = connection.readByte();
+	private LBR _robot = null;
+	private RobotData _robotData = null;
+
+	public CommandFactory(LinkedBlockingDeque<byte[]> recivedDataQueue,
+			LinkedBlockingDeque<IOutGoingCommand> outGoingCommandQueue,
+			LinkedBlockingDeque<IInCommingCommand> activCommandQueue,
+			LBR robot, RobotData robotData) {
+
+		_recivedDataQueue = recivedDataQueue;
+		_outGoingCommandQueue = outGoingCommandQueue;
+		_activCommandQueue = activCommandQueue;
+
+		_robot = robot;
+		_robotData = robotData;
+	}
+
+	@Override
+	public void run() {
+		byte[] header = _recivedDataQueue.getFirst();
 		String commandName = new String(header);
 
 		Command command = Command.getCommandFromName(commandName);
@@ -37,48 +53,56 @@ public class CommandFactory {
 
 		switch (command) {
 		case START:
-			xCoordinate = ByteBuffer.wrap(connection.readByte()).getInt();
-			yCoordinate = ByteBuffer.wrap(connection.readByte()).getInt();
-			zCoordinate = ByteBuffer.wrap(connection.readByte()).getInt();
+			xCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
+					.getInt();
+			yCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
+					.getInt();
+			zCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
+					.getInt();
 
 			frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
 
-			result = new StartCommand(robot, frame, activCommands, robotData);
+			result = new StartCommand(_robot, frame, _activCommandQueue,
+					_robotData);
 			break;
 		case STOP:
-			for (IInCommingCommand toStopCommand : activCommands) {
+			for (IInCommingCommand toStopCommand : _activCommandQueue) {
 				toStopCommand.abourt();
 			}
 			break;
 
 		case RESET:
-			result = new ResetCommand(robot, activCommands, robotData);
+			result = new ResetCommand(_robot, _activCommandQueue, _robotData);
 			break;
 		case FOLLOW:
 
-			xCoordinate = ByteBuffer.wrap(connection.readByte()).getInt();
-			yCoordinate = ByteBuffer.wrap(connection.readByte()).getInt();
-			zCoordinate = ByteBuffer.wrap(connection.readByte()).getInt();
+			xCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
+					.getInt();
+			yCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
+					.getInt();
+			zCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
+					.getInt();
 
 			frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
 
-			result = new FollowCommand(robot, frame, activCommands, robotData);
+			result = new FollowCommand(_robot, frame, _activCommandQueue,
+					_robotData);
 			break;
 
 		case SPEED_UP:
-			result = new SpeedUpCommand(robotData, activCommands);
+			result = new SpeedUpCommand(_robotData, _activCommandQueue);
 			break;
 
 		case SPEED_DOWN:
-			result = new SpeedDownCommand(robotData, activCommands);
+			result = new SpeedDownCommand(_robotData, _activCommandQueue);
 			break;
 
 		case INFO:
-			result = new InfoCommand(robot);
+			result = new InfoCommand(_robot);
 			break;
 
 		case STATUS:
-			result = new StatusCommand(robot);
+			result = new StatusCommand(_robot);
 			break;
 
 		default:
@@ -86,20 +110,20 @@ public class CommandFactory {
 			break;
 		}
 
-		
 		if (result instanceof IInCommingCommand) {
-			//Adding incomming command to aktive commands.
-			activCommands.add((IInCommingCommand) result);
-			
+			// Adding incomming command to aktive commands.
+			_activCommandQueue.add((IInCommingCommand) result);
+
 			// Command size is limited to 50.
-			int offset = activCommands.size() - 50;
-			if (offset > 0){
-				IInCommingCommand toRemoveCommand = activCommands.remove();
+			int offset = _activCommandQueue.size() - 50;
+			if (offset > 0) {
+				IInCommingCommand toRemoveCommand = _activCommandQueue
+						.removeLast();
 				toRemoveCommand.abourt();
 			}
+		} else if (result instanceof IOutGoingCommand) {
+			_outGoingCommandQueue.addLast((IOutGoingCommand) result);
 		}
-
-		return result;
 	}
 
 }

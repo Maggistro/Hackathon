@@ -12,8 +12,6 @@
 //#include <pthread.h>
 #include "Winsock2.h"
 #include "windows.h"
-//#include <WinSock2.h>
-//#include <winsock.h>
 #include <ws2tcpip.h>
 
 #include "DataTypes.h";
@@ -52,7 +50,7 @@
 
 class Socketmodul{
 
-private:
+public:
 	bool isClientConnected;
 	unsigned int tickRate;
 	bool stopConnection;
@@ -77,9 +75,9 @@ public:
 	void printSocketStatus();
 
 	//starts the server task
-	void SocketServerTaskForRead(Socketmodul* socketModul);
-	void SocketServerTaskForSend(Socketmodul* socketModul);
-
+	/*void SocketServerTaskForRead(Socketmodul* socketModul);
+	void SocketServerTaskForSend(LPVOID lpParameter);*/
+	static DWORD WINAPI SocketServerTaskForSend(LPVOID lpParameter);
 
 };
 

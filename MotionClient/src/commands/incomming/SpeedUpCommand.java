@@ -1,20 +1,23 @@
 package commands.incomming;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import robotData.RobotData;
 
-public class SpeedUpCommand implements IInCommingCommand{
+public class SpeedUpCommand extends AbstractInComingCommand {
 
 	/** The data for the robot. */
 	private RobotData _data = null;
-	private ConcurrentLinkedQueue<IInCommingCommand> _activCommands = null;
-	
+	private LinkedBlockingDeque<IInCommingCommand> _activCommands = null;
+
 	/**
 	 * Default constructor.
-	 * @param data The data of the robot which contains the velocity data.
+	 * 
+	 * @param data
+	 *            The data of the robot which contains the velocity data.
 	 */
-	public SpeedUpCommand(RobotData data,ConcurrentLinkedQueue<IInCommingCommand> activCommands) {
+	public SpeedUpCommand(RobotData data,
+			LinkedBlockingDeque<IInCommingCommand> activCommands) {
 		super();
 		_data = data;
 	}

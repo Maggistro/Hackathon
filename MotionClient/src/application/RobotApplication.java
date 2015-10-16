@@ -3,9 +3,7 @@ package application;
 
 import com.kuka.roboticsAPI.applicationModel.RoboticsAPIApplication;
 import static com.kuka.roboticsAPI.motionModel.BasicMotions.*;
-
 import com.kuka.roboticsAPI.controllerModel.Controller;
-import com.kuka.roboticsAPI.deviceModel.JointPosition;
 import com.kuka.roboticsAPI.deviceModel.LBR;
 
 /**
@@ -26,23 +24,19 @@ import com.kuka.roboticsAPI.deviceModel.LBR;
  * @see #run()
  * @see #dispose()
  */
-public class TestVelocityApplication extends RoboticsAPIApplication {
+public class RobotApplication extends RoboticsAPIApplication {
 	private Controller kuka_Sunrise_Cabinet_1;
 	private LBR _robot;
 
 	@Override
 	public void initialize() {
 		kuka_Sunrise_Cabinet_1 = getController("KUKA_Sunrise_Cabinet_1");
-		_robot = (LBR) getDevice(kuka_Sunrise_Cabinet_1, "LBR_iiwa_14_R820_1");
+		_robot = (LBR) getDevice(kuka_Sunrise_Cabinet_1,
+				"LBR_iiwa_14_R820_1");
 	}
 
 	@Override
 	public void run() {
-		_robot.move(ptpHome());
-		
-		final JointPosition start = new JointPosition(0,0,0,Math.toRadians(-90), 0,Math.toRadians(90),0);
-		_robot.move(ptp(start).setJointVelocityRel(0.25));
-		
 		_robot.move(ptpHome());
 	}
 
@@ -50,7 +44,7 @@ public class TestVelocityApplication extends RoboticsAPIApplication {
 	 * Auto-generated method stub. Do not modify the contents of this method.
 	 */
 	public static void main(String[] args) {
-		TestVelocityApplication app = new TestVelocityApplication();
+		RobotApplication app = new RobotApplication();
 		app.runApplication();
 	}
 }

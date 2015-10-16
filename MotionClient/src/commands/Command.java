@@ -1,4 +1,4 @@
-package commands.incomming;
+package commands;
 
 public enum Command {
 	START, STOP, FOLLOW, RESET, SPEED_UP, SPEED_DOWN, INFO, STATUS;

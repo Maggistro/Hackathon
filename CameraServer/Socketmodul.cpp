@@ -6,6 +6,7 @@ Socketmodul::Socketmodul(){
 	connectionStatus = false;
 	tickRate = MAX_TICK_RATE;
 	stopConnection = false;
+	isClientConnected = false;
 };
 
 
@@ -16,11 +17,12 @@ Socketmodul::~Socketmodul(){
 
 //startServer
 bool Socketmodul::startServer(){
-
-
-	//Hier brauchen wir noch einen Thread
-	SocketServerTaskForSend(this);
-	closeConnection();
+	//HANDLE handle;
+	std::thread socketThread(Socketmodul::SocketServerTaskForSend,this);
+	//if (handle = NULL) std::cout << "handle is null \n";
+	//SocketServerTaskForSend(this);
+	//closeConnection();
+	socketThread.join();
 
 	return true;
 };
@@ -28,7 +30,7 @@ bool Socketmodul::startServer(){
 
 // seen in "creating a socket for the server" in WINSOCKET docu.
 bool Socketmodul::openConnection(){
-
+	std::cout << "in openConnection \n";
 	////initialize Winsocket
 	WSADATA wsaData;
 
@@ -92,7 +94,7 @@ bool Socketmodul::openConnection(){
 		WSACleanup();
 		return false;
 	}
-
+	std::cout << "nach accept \n";
 	connectionStatus = true;
 	isClientConnected = true;
 	return true;
@@ -132,7 +134,7 @@ bool Socketmodul::handlePackage(instruction_package p){
 }
 
 
-void Socketmodul::SocketServerTaskForRead(Socketmodul* socket){
+void SocketServerTaskForRead(Socketmodul* socket){
 
 	char buffer[BUFFER_LENGTH];
 	int bytesRead = 0;
@@ -147,7 +149,7 @@ void Socketmodul::SocketServerTaskForRead(Socketmodul* socket){
 	while (!pSocketModul->stopConnection){
 		if (pSocketModul->openConnection()){
 			while (pSocketModul->isClientConnected && (!pSocketModul->stopConnection)){
-				iResult = recv(javaSocket, buffer, BUFFER_LENGTH, 0);
+			//	iResult = recv(javaSocket, buffer, BUFFER_LENGTH, 0);
 				if (iResult > 0){
 					printf("Bytes received: %d\n", iResult);
 
@@ -165,7 +167,7 @@ void Socketmodul::SocketServerTaskForRead(Socketmodul* socket){
 };
 
 
-void Socketmodul::SocketServerTaskForSend(Socketmodul* socketModul){
+DWORD WINAPI Socketmodul::SocketServerTaskForSend(LPVOID lpParameter){
 
 
 	char bufferSend[BUFFER_LENGTH];
@@ -174,32 +176,28 @@ void Socketmodul::SocketServerTaskForSend(Socketmodul* socketModul){
 	bool recvOK, sendOK = true;
 	int iSendResult, iResult;
 
-	Socketmodul *pSocketModul = socketModul;
+	Socketmodul *pSocketModul = (Socketmodul*)lpParameter;
 
 	pSocketModul->stopConnection = false;
+
+	std::string tmp = "cat";
+	strcpy(bufferSend, tmp.c_str());
 
 	//start processing loop
 	while (!pSocketModul->stopConnection){
 		if (pSocketModul->openConnection()){
 			while (pSocketModul->isClientConnected && (!pSocketModul->stopConnection)){
-				iSendResult = send(javaSocket, bufferSend, BUFFER_LENGTH, 0);
+				iSendResult = send(pSocketModul->javaSocket, bufferSend, BUFFER_LENGTH, 0);
 				if (iSendResult == SOCKET_ERROR){
 					printf("send failed: %d\n", WSAGetLastError());
-					closesocket(javaSocket);
 					WSACleanup();
 				}
-
-				iResult = recv(javaSocket, bufferRead, BUFFER_LENGTH, 0);
-				if (iResult > 0){
-					printf("Bytes received: %d\n", iResult);
-					std::cout << bufferRead;
-					//TODO: Check if you get something
-				}
-				
-				std::cout << bufferRead;
 				pSocketModul->stopConnection = true;
 
 			}
 		}
 	}
+
+	pSocketModul->closeConnection();
+	return 0;
 };

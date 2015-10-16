@@ -5,6 +5,7 @@ import com.kuka.roboticsAPI.applicationModel.RoboticsAPIApplication;
 import static com.kuka.roboticsAPI.motionModel.BasicMotions.*;
 
 import com.kuka.roboticsAPI.controllerModel.Controller;
+import com.kuka.roboticsAPI.deviceModel.JointPosition;
 import com.kuka.roboticsAPI.deviceModel.LBR;
 import com.kuka.roboticsAPI.motionModel.IMotionContainer;
 
@@ -42,7 +43,7 @@ public class TestResetApplication extends RoboticsAPIApplication {
 		
 		IMotionContainer motion = _robot.moveAsync(ptp(1,1,1,1,1,1,1));
 		
-		for (int counter = 0; counter < 1000; counter++) {
+		for (int counter = 0; counter < 100000; counter++) {
 			//simulate sleep
 		}
 		
@@ -52,6 +53,9 @@ public class TestResetApplication extends RoboticsAPIApplication {
 		}else{
 			System.out.println("Motion already has finished.");
 		}
+		
+		final JointPosition start = new JointPosition(0,0,0,Math.toRadians(-90), 0,Math.toRadians(90),0);
+		_robot.move(ptp(start));
 	}
 
 	/**

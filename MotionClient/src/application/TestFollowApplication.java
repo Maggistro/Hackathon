@@ -1,11 +1,16 @@
 package application;
 
 
+import static com.kuka.roboticsAPI.motionModel.BasicMotions.linRel;
+import static com.kuka.roboticsAPI.motionModel.BasicMotions.ptp;
+
 import com.kuka.roboticsAPI.applicationModel.RoboticsAPIApplication;
 import com.kuka.roboticsAPI.controllerModel.Controller;
+import com.kuka.roboticsAPI.deviceModel.JointPosition;
 import com.kuka.roboticsAPI.deviceModel.LBR;
 import com.kuka.roboticsAPI.geometricModel.Frame;
 import com.kuka.roboticsAPI.motionModel.CartesianPTP;
+import com.kuka.roboticsAPI.motionModel.RelativeLIN;
 
 /**
  * Implementation of a robot application.
@@ -37,27 +42,14 @@ public class TestFollowApplication extends RoboticsAPIApplication {
 
 	@Override
 	public void run() {
-		Frame currentFlangePosition = _robot.getCurrentCartesianPosition(_robot.getFlange());
-		Frame frame = new Frame (0.0,0.0,1.0);
+		final JointPosition start = new JointPosition(0,0,0,Math.toRadians(-90), 0,Math.toRadians(90),0);
+		_robot.move(ptp(start));
+		//_robot.move(ptp(getApplicationData().getFrame("/Home")));
 		
-		double x = frame.getX() != 0.0? currentFlangePosition.getX() + frame.getX() : currentFlangePosition.getX();
-		double z = frame.getY() != 0.0? currentFlangePosition.getY() + frame.getY() : currentFlangePosition.getY();
-		double y = frame.getZ() != 0.0? currentFlangePosition.getZ() + frame.getZ() : currentFlangePosition.getZ();		
-	
-		Frame moveToFrame = new Frame(x,y,z);
-		
-		_robot.move(new CartesianPTP(moveToFrame));
-		
-		currentFlangePosition = _robot.getCurrentCartesianPosition(_robot.getFlange());
-		frame = new Frame (0.0,1.0,0.0);
-		
-		x = frame.getX() != 0.0? currentFlangePosition.getX() + frame.getX() : currentFlangePosition.getX();
-		z = frame.getY() != 0.0? currentFlangePosition.getY() + frame.getY() : currentFlangePosition.getY();
-		y = frame.getZ() != 0.0? currentFlangePosition.getZ() + frame.getZ() : currentFlangePosition.getZ();		
-	
-		moveToFrame = new Frame(x,y,z);
-		
-		_robot.moveAsync(new CartesianPTP(moveToFrame));
+		Frame frameOffset = new Frame(0.0, 0.0, -50.0);
+			
+		RelativeLIN motion = linRel(frameOffset.getX(), frameOffset.getY(), frameOffset.getZ());
+		_robot.move(motion);
 	}
 
 	/**
