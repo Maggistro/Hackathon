@@ -6,13 +6,10 @@ defines a set of widely used data types for socket and interprocess communicatio
 */
 
 typedef struct {
-	char* header;
-	float offsetX;
-	float offsetY;
-	float offsetZ;
-	float x;
-	float y;
-	float z;
+	char header[64];
+	 _int64 x;
+	 _int64 y;
+	 _int64 z;
 }instruction_package;
 
 typedef enum {

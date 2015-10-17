@@ -9,7 +9,6 @@ void threadfunction(){
 	for (int i = 0; i < 30; i++){
 		Queue& q = Queue::getInstance();
 		instruction_package pack;
-		pack.header = "klsdjf";
 		q.add(pack);
 		Sleep(1000);
 	}

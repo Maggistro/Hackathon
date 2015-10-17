@@ -7,6 +7,9 @@
 #include <pxchandconfiguration.h>
 #include <iostream>
 #include <thread>
+#include "Queue.h"
+
+
 
 using namespace std;
 //wchar_t const* fist = L"fist";
@@ -17,6 +20,7 @@ wchar_t const* two_fingers_pinch_open = L"two_fingers_pinch_open";
 wchar_t const* wave = L"wave";
 wchar_t const* initial = spreadfingers;
 
+
 typedef enum {
 	Undefined,
 	FingerSpread,
@@ -24,28 +28,71 @@ typedef enum {
 	Wave
 }Gesture;
 
-instruction_package sendPackageFollow(Gesture gesture, float offset_handTipX, float offset_handTipY, float offset_handTipZ) {
+int maximum(_int64 x, _int64 y, _int64 z) {
+	int max = abs(x); /* assume x is the largest */
+	int coord = 1;
+	if (abs(y) > max) { /* if y is larger than max, assign y to max */
+		max = abs(y);
+		coord = 2;
+	    
+	} /* end if */
+
+	if (abs(z) > max) { /* if z is larger than max, assign z to max */
+		max = abs(z);
+		coord = 3;
+	} /* end if */
+
+	return coord; /* max is the largest value */
+} /* end function maximum */
+
+instruction_package getPackageFollow(Gesture gesture, float offset_handTipX, float offset_handTipY, float offset_handTipZ) {
 	instruction_package sp;
-	sp.header = "follow";
-	sp.offsetX = offset_handTipX;
-	sp.offsetY = offset_handTipY;
-	sp.offsetZ = offset_handTipZ;
-	cout << "send follow package with : " << sp.offsetX << " " << sp.offsetY << " " << sp.offsetZ << endl;
+	char* temp = "follow";
+	memcpy(sp.header, temp, sizeof(temp));
+
+	sp.x = (_int64)(offset_handTipX*1000);
+	sp.y = (_int64)(offset_handTipY * 1000);
+	sp.z = (_int64)(offset_handTipZ * 1000);
+	cout << "send follow package with : " << sp.x << " " << sp.y << " " << sp.z << endl;
 	return sp;
 
 }
-instruction_package sendPackageStart(Gesture gesture, float handTipX, float handTipY, float handTipZ) {
+instruction_package getPackageStart(Gesture gesture, float offset_handTipX, float offset_handTipY, float offset_handTipZ) {
 	instruction_package sp;
-	sp.header = "start";
-	sp.x = handTipX;
-	sp.y = handTipY;
-	sp.z = handTipZ;
-	cout << "send start package with : " << sp.x << " " << sp.y << " " << sp.z << endl;
+	char* temp = "start";
+	memcpy(sp.header, temp, sizeof(temp));
+
+	sp.x = (_int64)(offset_handTipX * 1000);
+	sp.y = (_int64)(offset_handTipY * 1000);
+	sp.z = (_int64)(offset_handTipZ * 1000);
+	int result = maximum(sp.x, sp.y, sp.z);
+	if (result == 1) {
+		sp.y = 0;
+		sp.z = 0;
+		cout << "send start package with : " << sp.x << " " << sp.y << " " << sp.z << endl;
+
+	}
+	else if (result == 2) {
+		sp.x = 0;
+		sp.z = 0;
+		cout << "send start package with : " << sp.x << " " << sp.y << " " << sp.z << endl;
+	}
+	else if (result == 3) {
+		sp.x = 0;
+		sp.y = 0;
+		cout << "send start package with : " << sp.x << " " << sp.y << " " << sp.z << endl;
+		
+	}
+	else {
+		cout << "error: no max values" << endl;
+
+	}
 	return sp;
 }
-instruction_package sendPackageReset(Gesture gesture) {
+instruction_package getPackageReset(Gesture gesture) {
 	instruction_package sp;
-	sp.header = "reset";
+	char* temp = "reset";
+	memcpy(sp.header, temp, sizeof(temp));
 	cout << "send reset package" << endl;
 	return sp;
 }
@@ -111,7 +158,7 @@ void configure()
 	config->EnableAllAlerts();
 	config->ApplyChanges();
 	//config->Update();
-
+	
 }
 
 
@@ -170,7 +217,7 @@ void processThread()
 					//cout <<" offset X "<< offset_handTipX <<"offset Y "<< offset_handTipY<< " Z "<<offset_handTipZ<< endl;
 				}
 				else {
-					if (handData->IsGestureFired(spreadfingers, gestureData)) {
+					/*if (handData->IsGestureFired(spreadfingers, gestureData)) {
 						counterB, counterC = 0;
 						counterA++;
 						cout << "spreadfingers" << endl;
@@ -180,14 +227,16 @@ void processThread()
 							sendPackageStart(gesture, handTipX, handTipY, handTipZ);
 						}
 					}
-					else if (handData->IsGestureFired(two_fingers_pinch_open, gestureData)) {
+					else*/ 
+					if (handData->IsGestureFired(two_fingers_pinch_open, gestureData)) {
 						counterA, counterC = 0;
 						counterB++;
 						cout << "two_fingers_pinch_open" << endl;
 						cout << counterB << endl;
 						gesture = Gesture::Pinch;
-						if (counterB > 30) {
-							sendPackageFollow(gesture, offset_handTipX, offset_handTipY, offset_handTipZ);
+						if (counterB > 30) {							
+							std::this_thread::sleep_for(std::chrono::milliseconds(200));
+							Queue::getInstance().add(getPackageFollow(gesture, offset_handTipX, offset_handTipY, offset_handTipZ));
 						}
 					}
 					else if (handData->IsGestureFired(wave, gestureData)) {
@@ -196,7 +245,9 @@ void processThread()
 						cout << "wave" << endl; gesture = Gesture::Wave;
 						cout << counterC << endl;
 						if (counterC > 30) {
-							sendPackageReset(gesture);
+							std::this_thread::sleep_for(std::chrono::milliseconds(200));
+							Queue::getInstance().add(getPackageReset(gesture));
+
 						}
 					}
 
