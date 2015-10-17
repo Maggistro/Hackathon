@@ -18,10 +18,9 @@ void Queue::add(instruction_package instr){
 
 instruction_package Queue::get(){
 
-	do{
-		mtx.try_lock();
-	}while (q.size() == 0);
+	while (q.size() == 0);
 
+	mtx.lock();
 	instruction_package item = q.front();
 	q.pop();
 	mtx.unlock();

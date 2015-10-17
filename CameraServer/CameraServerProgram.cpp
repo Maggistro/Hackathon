@@ -2,7 +2,19 @@
 #include "CameraWorker.h";
 #include "Socketmodul.h";
 #include "Queue.h";
+#include <thread>
 
+void threadfunction(){
+
+	for (int i = 0; i < 30; i++){
+		Queue& q = Queue::getInstance();
+		instruction_package pack;
+		pack.header = "klsdjf";
+		q.add(pack);
+		Sleep(1000);
+	}
+
+}
 
 void main(){
 	//test
@@ -12,14 +24,14 @@ void main(){
 	//init camera worker 
 	CameraWorker cameraWorker;
 
-	Queue& q = Queue::getInstance();
-	instruction_package pack;
-	pack.header = "klsdjf";
-	q.add(pack);
+	std::thread socketThread(threadfunction);
+	
 
 	Socketmodul module;
 	module.startServer();
 
+
+	socketThread.join();
 	//new producer thread interpreting camera data and creating packages for the queue 
 
 	//init socket server
@@ -31,5 +43,7 @@ void main(){
 
 
 }
+
+
 
 

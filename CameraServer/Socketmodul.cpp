@@ -130,11 +130,10 @@ void Socketmodul::printSocketStatus(){
 char* Socketmodul::handlePackage(instruction_package p){
 
 	char buffer[BUFFER_LENGTH];
-	std::string tmp = "cat";
-	strcpy(buffer, tmp.c_str());
+	memcpy(buffer, &p, sizeof(instruction_package));
+	return buffer;
 	
 
-	return buffer;
 }
 
 
@@ -197,6 +196,7 @@ DWORD WINAPI Socketmodul::SocketServerTaskForSend(LPVOID lpParameter){
 				Sleep(200);
 				package = q.get();
 				bufferSend = pSocketModul->handlePackage(package);
+				std::cout << bufferSend;
 				iSendResult = send(pSocketModul->javaSocket, bufferSend, BUFFER_LENGTH, 0);
 
 				if (iSendResult == SOCKET_ERROR){
