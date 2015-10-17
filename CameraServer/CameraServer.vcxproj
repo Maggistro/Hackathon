@@ -27,7 +27,12 @@
   <ItemGroup>
     <ClCompile Include="CameraServerProgram.cpp" />
     <ClCompile Include="CameraWorker.cpp" />
+<<<<<<< HEAD
     <ClCompile Include="Queue.cpp" />
+=======
+    <ClCompile Include="CameraWorkerVesrion1.cpp" />
+    <ClCompile Include="Pipe.cpp" />
+>>>>>>> 27510f86f9c4c97d5382215db040a0eab003fa02
     <ClCompile Include="Socketmodul.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
