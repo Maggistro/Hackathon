@@ -1,6 +1,7 @@
-#include "CameraServerProgram.h"
-#include "CameraWorker.h"
-#include "Socketmodul.h"
+#include "CameraServerProgram.h";
+#include "CameraWorker.h";
+#include "Socketmodul.h";
+#include "Queue.h";
 
 
 void main(){
@@ -10,6 +11,12 @@ void main(){
 
 	//init camera worker 
 	CameraWorker cameraWorker;
+
+	Queue& q = Queue::getInstance();
+	instruction_package pack;
+	pack.header = "klsdjf";
+	q.add(pack);
+
 	Socketmodul module;
 	module.startServer();
 

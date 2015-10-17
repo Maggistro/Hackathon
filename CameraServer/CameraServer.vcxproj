@@ -19,16 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Pipe.h" />
+    <ClInclude Include="Queue.h" />
     <ClInclude Include="Socketmodul.h" />
     <ClInclude Include="CameraWorker.h" />
     <ClInclude Include="DataTypes.h" />
-    <ClInclude Include="SocketServer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CameraServerProgram.cpp" />
     <ClCompile Include="CameraWorker.cpp" />
-    <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="Queue.cpp" />
     <ClCompile Include="Socketmodul.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

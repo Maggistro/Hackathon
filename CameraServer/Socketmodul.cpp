@@ -1,5 +1,5 @@
 #include <Socketmodul.h>
-
+#include <Queue.h>
 
 // constructor
 Socketmodul::Socketmodul(){
@@ -34,7 +34,7 @@ bool Socketmodul::openConnection(){
 	////initialize Winsocket
 	WSADATA wsaData;
 
-	int iResult;
+	int iResult = -2;
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0){
 		printf("WSAStartup failed: %d\n", iResult);
@@ -63,6 +63,7 @@ bool Socketmodul::openConnection(){
 
 	//bind and freeresult
 	iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
+	//bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (iResult == SOCKET_ERROR){
 		printf("bind failed with error: %d\n", WSAGetLastError());
 		freeaddrinfo(result);
@@ -167,6 +168,7 @@ void SocketServerTaskForRead(Socketmodul* socket){
 };
 
 
+
 DWORD WINAPI Socketmodul::SocketServerTaskForSend(LPVOID lpParameter){
 
 
@@ -183,11 +185,16 @@ DWORD WINAPI Socketmodul::SocketServerTaskForSend(LPVOID lpParameter){
 	std::string tmp = "cat";
 	strcpy(bufferSend, tmp.c_str());
 
+	Queue& q = Queue::getInstance();
+	instruction_package package;
+
 	//start processing loop
 	while (!pSocketModul->stopConnection){
 		if (pSocketModul->openConnection()){
 			while (pSocketModul->isClientConnected && (!pSocketModul->stopConnection)){
+				package = q.get();
 				iSendResult = send(pSocketModul->javaSocket, bufferSend, BUFFER_LENGTH, 0);
+
 				if (iSendResult == SOCKET_ERROR){
 					printf("send failed: %d\n", WSAGetLastError());
 					WSACleanup();
