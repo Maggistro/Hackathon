@@ -18,7 +18,7 @@
 
 // constant declarations
 #define SOCKETMODUL_PORT "27015"
-#define BUFFER_LENGTH 512
+#define BUFFER_LENGTH 300
 
 // send rate or timeout
 #define MAX_TICK_RATE  100;
