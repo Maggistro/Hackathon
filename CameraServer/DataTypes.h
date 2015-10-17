@@ -7,7 +7,12 @@ defines a set of widely used data types for socket and interprocess communicatio
 
 typedef struct {
 	char* header;
-	_int64* data;
+	float offsetX;
+	float offsetY;
+	float offsetZ;
+	float x;
+	float y;
+	float z;
 }instruction_package;
 
 typedef enum {

@@ -24,17 +24,32 @@ typedef enum {
 	Wave
 }Gesture;
 
-instruction_package sendPackage(Gesture gesture, float offset_handTipX, float offset_handTipY,float offset_handTipZ) {
+instruction_package sendPackageFollow(Gesture gesture, float offset_handTipX, float offset_handTipY, float offset_handTipZ) {
 	instruction_package sp;
-	headers hd;
-	
-	if (gesture == Gesture::Pinch) {
-		hd = headers::follow;
-		sp.header = "follow";
-		//sp.data = offset_handTipX;
-	}
-	
+	sp.header = "follow";
+	sp.offsetX = offset_handTipX;
+	sp.offsetY = offset_handTipY;
+	sp.offsetZ = offset_handTipZ;
+	cout << "send follow package with : " << sp.offsetX << " " << sp.offsetY << " " << sp.offsetZ << endl;
+	return sp;
+
 }
+instruction_package sendPackageStart(Gesture gesture, float handTipX, float handTipY, float handTipZ) {
+	instruction_package sp;
+	sp.header = "start";
+	sp.x = handTipX;
+	sp.y = handTipY;
+	sp.z = handTipZ;
+	cout << "send start package with : " << sp.x << " " << sp.y << " " << sp.z << endl;
+	return sp;
+}
+instruction_package sendPackageReset(Gesture gesture) {
+	instruction_package sp;
+	sp.header = "reset";
+	cout << "send reset package" << endl;
+	return sp;
+}
+
 
 pxcF32 handCenterX;
 pxcF32 handCenterY;
@@ -102,6 +117,9 @@ void configure()
 
 void processThread()
 {
+	int counterA = 0;
+	int counterB = 0;
+	int counterC = 0;
 	// Start AcquireFrame/ReleaseFrame loop
 	while (senseManager->AcquireFrame(true) >= pxcStatus::PXC_STATUS_NO_ERROR)
 	{
@@ -152,24 +170,45 @@ void processThread()
 					//cout <<" offset X "<< offset_handTipX <<"offset Y "<< offset_handTipY<< " Z "<<offset_handTipZ<< endl;
 				}
 				else {
+					if (handData->IsGestureFired(spreadfingers, gestureData)) {
+						counterB, counterC = 0;
+						counterA++;
+						cout << "spreadfingers" << endl;
+						gesture = Gesture::FingerSpread;
+						cout << counterA << endl;
+						if (counterA > 30) {
+							sendPackageStart(gesture, handTipX, handTipY, handTipZ);
+						}
+					}
+					else if (handData->IsGestureFired(two_fingers_pinch_open, gestureData)) {
+						counterA, counterC = 0;
+						counterB++;
+						cout << "two_fingers_pinch_open" << endl;
+						cout << counterB << endl;
+						gesture = Gesture::Pinch;
+						if (counterB > 30) {
+							sendPackageFollow(gesture, offset_handTipX, offset_handTipY, offset_handTipZ);
+						}
+					}
+					else if (handData->IsGestureFired(wave, gestureData)) {
+						counterA, counterB = 0;
+						counterC++;
+						cout << "wave" << endl; gesture = Gesture::Wave;
+						cout << counterC << endl;
+						if (counterC > 30) {
+							sendPackageReset(gesture);
+						}
+					}
+
 					offset_handTipX = handTipX - prev_handTipX;
 					offset_handTipY = handTipY - prev_handTipY;
 					offset_handTipZ = handTipZ - offset_handTipZ;
-					if (handData->IsGestureFired(two_fingers_pinch_open, gestureData)) {
-						cout << " offset X " << offset_handTipX << "offset Y " << offset_handTipY << " Z " << offset_handTipZ << endl;
-					}
+
 					prev_handTipX = handTipX;
 					prev_handTipY = handTipY;
 					prev_handTipZ = handTipZ;
 				}
-				//pxcF32 tempHandCenterX = nodes[0][PXCHandData::JointType::JOINT_MIDDLE_TIP].positionWorld.x;
-				//pxcF32 tempHandCenterY = nodes[0][PXCHandData::JointType::JOINT_MIDDLE_TIP].positionWorld.y;
-				//pxcF32 tempHandCenterZ = nodes[0][PXCHandData::JointType::JOINT_MIDDLE_TIP].positionWorld.z;
-
 				// Retrieve gesture data
-				if (handData->IsGestureFired(spreadfingers, gestureData)) { cout << "spreadfingers" << endl; gesture = Gesture::FingerSpread; }
-				else if (handData->IsGestureFired(two_fingers_pinch_open, gestureData)) { cout << "two_fingers_pinch_open" << endl; gesture = Gesture::Pinch; }
-				else if (handData->IsGestureFired(wave, gestureData)) { cout << "wave" << endl; gesture = Gesture::Wave; }
 			}
 			else
 			{
@@ -226,10 +265,10 @@ void processThread()
 }
 
 CameraWorker::CameraWorker()
-{			
+{
 	configure();
 	processThread();
-	
+
 }
 CameraWorker::~CameraWorker()
 {

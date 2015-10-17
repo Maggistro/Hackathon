@@ -12,7 +12,6 @@ public:
 	//starts camera worker task
 	void* CameraWorkerTask(void* arg);
 
-	
+
 
 };
-
