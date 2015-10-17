@@ -127,11 +127,14 @@ void Socketmodul::printSocketStatus(){
 };
 
 
-bool Socketmodul::handlePackage(instruction_package p){
+char* Socketmodul::handlePackage(instruction_package p){
 
-	//TODO: handle packages
+	char buffer[BUFFER_LENGTH];
+	std::string tmp = "cat";
+	strcpy(buffer, tmp.c_str());
+	
 
-	return true;
+	return buffer;
 }
 
 
@@ -172,8 +175,7 @@ void SocketServerTaskForRead(Socketmodul* socket){
 DWORD WINAPI Socketmodul::SocketServerTaskForSend(LPVOID lpParameter){
 
 
-	char bufferSend[BUFFER_LENGTH];
-	char bufferRead[BUFFER_LENGTH];
+	char* bufferSend;
 	int bytesRead = 0;
 	bool recvOK, sendOK = true;
 	int iSendResult, iResult;
@@ -182,8 +184,7 @@ DWORD WINAPI Socketmodul::SocketServerTaskForSend(LPVOID lpParameter){
 
 	pSocketModul->stopConnection = false;
 
-	std::string tmp = "cat";
-	strcpy(bufferSend, tmp.c_str());
+	
 
 	Queue& q = Queue::getInstance();
 	instruction_package package;
@@ -192,14 +193,17 @@ DWORD WINAPI Socketmodul::SocketServerTaskForSend(LPVOID lpParameter){
 	while (!pSocketModul->stopConnection){
 		if (pSocketModul->openConnection()){
 			while (pSocketModul->isClientConnected && (!pSocketModul->stopConnection)){
+				//sleeptimer: read 5 times a second
+				Sleep(200);
 				package = q.get();
+				bufferSend = pSocketModul->handlePackage(package);
 				iSendResult = send(pSocketModul->javaSocket, bufferSend, BUFFER_LENGTH, 0);
 
 				if (iSendResult == SOCKET_ERROR){
 					printf("send failed: %d\n", WSAGetLastError());
 					WSACleanup();
 				}
-				pSocketModul->stopConnection = true;
+				
 
 			}
 		}

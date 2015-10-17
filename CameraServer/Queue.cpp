@@ -17,8 +17,10 @@ void Queue::add(instruction_package instr){
 }
 
 instruction_package Queue::get(){
+	
 	mtx.lock();
 	instruction_package instr;
+
 	instr = (instruction_package)q.front();
 	q.pop();
 	mtx.unlock();

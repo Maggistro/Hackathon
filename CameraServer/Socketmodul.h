@@ -68,7 +68,7 @@ public:
 	
 	bool openConnection();
 	bool closeConnection();	
-	bool handlePackage(instruction_package p);
+	char* handlePackage(instruction_package p);
 
 	//some not needed functions :)
 	void changeConnectionTickRate(int newTickRate);
