@@ -7,7 +7,7 @@
                     <Value>LBR_iiwa_14_R820_1</Value>
                 </Property>
                 <Property displayName="Medien-Flansch" key="MAM" showInEditor="true" showInWizard="true" type="String">
-                    <Value displayName="Light Beta (MLB)">MADA=MLB&amp;IOConfig=MLB</Value>
+                    <Value displayName="Medien-Flansch">MADA=MF&amp;IOConfig=Default</Value>
                     <PossibleValue displayName="Medien-Flansch">MADA=MF&amp;IOConfig=Default</PossibleValue>
                     <PossibleValue displayName="Medien-Flansch pneumatisch">MADA=MF&amp;IOConfig=Default</PossibleValue>
                     <PossibleValue displayName="Medien-Flansch elektrisch">MADA=MF&amp;IOConfig=Default</PossibleValue>
@@ -196,7 +196,7 @@
                 <Value>KUKA_Sunrise_Cabinet_1</Value>
             </Property>
             <Property displayName="IP" key="IP" showInEditor="true" showInWizard="false" type="String">
-                <Value>192.168.41.4</Value>
+                <Value>192.168.43.135</Value>
             </Property>
         </TopologyItem>
         <Property displayName="userName" key="userName" showInEditor="false" showInWizard="false" type="String">

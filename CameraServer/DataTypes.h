@@ -6,7 +6,7 @@ defines a set of widely used data types for socket and interprocess communicatio
 */
 
 typedef struct {
-	char header[64];
+	char header[8];
 	 _int64 x;
 	 _int64 y;
 	 _int64 z;

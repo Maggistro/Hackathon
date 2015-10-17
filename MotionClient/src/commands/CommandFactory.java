@@ -41,90 +41,93 @@ public class CommandFactory implements Runnable {
 	}
 
 	@Override
-	public void run() {
-		byte[] header = _recivedDataQueue.getFirst();
-		String commandName = new String(header);
+	public void run(){ 
+		while (true) {
+			if (_recivedDataQueue.size() > 0) {
+				byte[] header = _recivedDataQueue.poll();
+				String commandName = new String(header);
+				Command command = Command.getCommandFromName(commandName);
+				ICommand result = null;
+				int xCoordinate = 0;
+				int yCoordinate = 0;
+				int zCoordinate = 0;
+				Frame frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
+				System.out.println(commandName);
+				switch (command) {
+				case START:
+					xCoordinate = (int) ByteBuffer.wrap(_recivedDataQueue.poll())
+							.getLong();
+					yCoordinate = (int) ByteBuffer.wrap(_recivedDataQueue.poll())
+							.getLong();
+					zCoordinate = (int) ByteBuffer.wrap(_recivedDataQueue.poll())
+							.getLong();
 
-		Command command = Command.getCommandFromName(commandName);
-		ICommand result = null;
+					frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
 
-		int xCoordinate = 0;
-		int yCoordinate = 0;
-		int zCoordinate = 0;
-		Frame frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
+					result = new StartCommand(_robot, frame,
+							_activCommandQueue, _robotData);
+					break;
+				case STOP:
+					for (IInCommingCommand toStopCommand : _activCommandQueue) {
+						toStopCommand.abourt();
+					}
+					break;
 
-		switch (command) {
-		case START:
-			xCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
-					.getInt();
-			yCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
-					.getInt();
-			zCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
-					.getInt();
+				case RESET:
+					result = new ResetCommand(_robot, _activCommandQueue,
+							_robotData);
+					break;
+				case FOLLOW:
 
-			frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
+					xCoordinate = (int) ByteBuffer.wrap(_recivedDataQueue.poll())
+							.getLong();
+					yCoordinate = (int) ByteBuffer.wrap(_recivedDataQueue.poll())
+							.getLong();
+					zCoordinate = (int) ByteBuffer.wrap(_recivedDataQueue.poll())
+							.getLong();
 
-			result = new StartCommand(_robot, frame, _activCommandQueue,
-					_robotData);
-			break;
-		case STOP:
-			for (IInCommingCommand toStopCommand : _activCommandQueue) {
-				toStopCommand.abourt();
+					frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
+
+					result = new FollowCommand(_robot, frame,
+							_activCommandQueue, _robotData);
+					break;
+
+				case SPEED_UP:
+					result = new SpeedUpCommand(_robotData, _activCommandQueue);
+					break;
+
+				case SPEED_DOWN:
+					result = new SpeedDownCommand(_robotData,
+							_activCommandQueue);
+					break;
+
+				case INFO:
+					result = new InfoCommand(_robot);
+					break;
+
+				case STATUS:
+					result = new StatusCommand(_robot);
+					break;
+
+				default:
+					System.out.println("Unkown Command: " + command.name());
+					break;
+				}
+				if (result instanceof IInCommingCommand) {
+					// Adding incomming command to aktive commands.
+					_activCommandQueue.add((IInCommingCommand) result);
+
+					// Command size is limited to 50.
+					int offset = _activCommandQueue.size() - 50;
+					if (offset > 0) {
+						IInCommingCommand toRemoveCommand = _activCommandQueue
+								.removeLast();
+						toRemoveCommand.abourt();
+					}
+				} else if (result instanceof IOutGoingCommand) {
+					_outGoingCommandQueue.addLast((IOutGoingCommand) result);
+				}
 			}
-			break;
-
-		case RESET:
-			result = new ResetCommand(_robot, _activCommandQueue, _robotData);
-			break;
-		case FOLLOW:
-
-			xCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
-					.getInt();
-			yCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
-					.getInt();
-			zCoordinate = ByteBuffer.wrap(_recivedDataQueue.getFirst())
-					.getInt();
-
-			frame = new Frame(xCoordinate, yCoordinate, zCoordinate);
-
-			result = new FollowCommand(_robot, frame, _activCommandQueue,
-					_robotData);
-			break;
-
-		case SPEED_UP:
-			result = new SpeedUpCommand(_robotData, _activCommandQueue);
-			break;
-
-		case SPEED_DOWN:
-			result = new SpeedDownCommand(_robotData, _activCommandQueue);
-			break;
-
-		case INFO:
-			result = new InfoCommand(_robot);
-			break;
-
-		case STATUS:
-			result = new StatusCommand(_robot);
-			break;
-
-		default:
-			System.out.println("Unkown Command: " + command.name());
-			break;
-		}
-
-		if (result instanceof IInCommingCommand) {
-			// Adding incomming command to aktive commands.
-			_activCommandQueue.add((IInCommingCommand) result);
-
-			// Command size is limited to 50.
-			int offset = _activCommandQueue.size() - 50;
-			if (offset > 0) {
-				IInCommingCommand toRemoveCommand = _activCommandQueue
-						.removeLast();
-				toRemoveCommand.abourt();
-			}
-		} else if (result instanceof IOutGoingCommand) {
-			_outGoingCommandQueue.addLast((IOutGoingCommand) result);
 		}
 	}
 

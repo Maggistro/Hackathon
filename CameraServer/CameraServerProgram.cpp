@@ -1,6 +1,7 @@
 #include "CameraServerProgram.h";
-#include "CameraWorker.h";
 #include "Socketmodul.h";
+#include "CameraWorker.h";
+
 #include "Queue.h";
 #include <thread>
 
@@ -21,16 +22,12 @@ void main(){
 	//thread safe queue containing packages
 
 	//init camera worker 
-	CameraWorker cameraWorker;
-
-	std::thread socketThread(threadfunction);
-	
+	CameraWorker* cameraWorker = new CameraWorker();
+	std::thread cameraWorkerthread(CameraWorker::processThread, cameraWorker);
 
 	Socketmodul module;
 	module.startServer();
 
-
-	socketThread.join();
 	//new producer thread interpreting camera data and creating packages for the queue 
 
 	//init socket server

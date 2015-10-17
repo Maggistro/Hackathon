@@ -36,8 +36,8 @@ import connection.ConnectionServer;
  * @see #dispose()
  */
 public class ClientApplication extends RoboticsAPIApplication {
-	private final static String ipAddress = "";
-	private final static int clientPort = 0000;
+	private final static String ipAddress = "192.168.41.6";
+	private final static int clientPort = 27015;
 	private final static int serverPort = 0000;
 
 	private Controller kuka_Sunrise_Cabinet_1;
@@ -60,20 +60,20 @@ public class ClientApplication extends RoboticsAPIApplication {
 	public void run() {
 		System.out.println(lbr_iiwa_14_R820_1.getCurrentJointPosition());
 		
-		ExecutorService executorService = Executors.newFixedThreadPool(3);
+		ExecutorService executorService = Executors.newFixedThreadPool(2);
 
 		CommandFactory commandFactory = new CommandFactory(
 				_recivedDataQueue, _outGoingCommandQueue,
 				_activCommandQueue, lbr_iiwa_14_R820_1, robotData);
 		ConnectionClient client = new ConnectionClient(_recivedDataQueue,
 				clientPort, ipAddress);
-		ConnectionServer server = new ConnectionServer(
-				_outGoingCommandQueue, serverPort);
+//		ConnectionServer server = new ConnectionServer(
+//				_outGoingCommandQueue, serverPort);
 		
+		executorService.execute(client);
+		//executorService.execute(server);
+		executorService.execute(commandFactory);
 		do {
-			executorService.execute(client);
-			//executorService.execute(server);
-			executorService.execute(commandFactory);
 		} while (true);
 	}
 

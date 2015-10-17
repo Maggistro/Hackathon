@@ -10,8 +10,8 @@
 
 // its a linux specific library
 //#include <pthread.h>
-#include "Winsock2.h"
-#include "windows.h"
+#include <Winsock2.h>
+#include <Windows.h>
 #include <ws2tcpip.h>
 
 #include "DataTypes.h";

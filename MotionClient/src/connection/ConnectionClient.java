@@ -79,7 +79,7 @@ public class ConnectionClient implements Runnable{
 		InputStream inputStream = client.getInputStream();
 		DataInputStream dataInputStream = new DataInputStream(inputStream);
 
-		int len = 64;
+		int len = 8;
 		byte[] data = new byte[len];
 		dataInputStream.read(data);
 

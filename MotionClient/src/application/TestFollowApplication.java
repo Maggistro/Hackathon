@@ -46,9 +46,19 @@ public class TestFollowApplication extends RoboticsAPIApplication {
 		_robot.move(ptp(start));
 		//_robot.move(ptp(getApplicationData().getFrame("/Home")));
 		
-		Frame frameOffset = new Frame(0.0, 0.0, -50.0);
+		Frame frameOffset = new Frame(0.0, 200.0, 0.0);
 			
 		RelativeLIN motion = linRel(frameOffset.getX(), frameOffset.getY(), frameOffset.getZ());
+		_robot.move(motion);
+		
+		frameOffset = new Frame(0.0, 0.0, 200.0);
+		
+		motion = linRel(frameOffset.getX(), frameOffset.getY(), frameOffset.getZ());
+		_robot.move(motion);
+		
+		frameOffset = new Frame(0.0, -200.0, 0.0);
+		
+		motion = linRel(frameOffset.getX(), frameOffset.getY(), frameOffset.getZ());
 		_robot.move(motion);
 	}
 
