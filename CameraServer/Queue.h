@@ -5,6 +5,7 @@
 
 #include <queue>
 #include <mutex>
+#include <condition_variable>
 
 #include "datatypes.h";
 
@@ -23,6 +24,7 @@ private:
 	~Queue();
 	std::queue<instruction_package> q;
 	std::mutex mtx;
+	std::condition_variable cond;
 };
 
 
